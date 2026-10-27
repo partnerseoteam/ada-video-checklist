@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive checklist for reviewing WCAG compliance of video content and video players.">
+  <title>Video WCAG Compliance Checker</title>
+  <style>
+    :root { --ink:#102a43; --muted:#486581; --line:#cbd5e1; --surface:#f6f9fc; --card:#fff; --brand:#005ea8; --brand-dark:#003e73; --good:#137333; --warn:#9c2f00; --danger:#b42318; --focus:#ffbe2e; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--surface); font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    button,select,input,textarea { font:inherit; }
+    button,select,input,textarea { border:1px solid #64748b; border-radius:4px; }
+    button { cursor:pointer; font-weight:700; }
+    button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+    .skip { position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip:focus { left:1rem; top:1rem; width:auto; height:auto; z-index:10; padding:.6rem .85rem; background:#fff; color:#000; }
+    header { background:var(--ink); color:#fff; border-bottom:5px solid #45b2e8; }
+    .wrap { width:min(1180px,calc(100% - 2rem)); margin:0 auto; }
+    .hero { padding:2rem 0 1.7rem; }
+    h1 { font-size:clamp(1.7rem,4vw,2.5rem); line-height:1.15; margin:0 0 .55rem; }
+    .hero p { max-width:800px; margin:0; color:#d9eaf7; }
+    main { padding:1.5rem 0 3rem; }
+    .notice { border-left:5px solid #45b2e8; background:#e7f5ff; padding:1rem; margin:0 0 1.25rem; }
+    .notice p { margin:.15rem 0; }
+    .toolbar, .summary-grid, .card { background:var(--card); border:1px solid var(--line); box-shadow:0 1px 2px #102a4314; }
+    .toolbar { padding:1rem; display:grid; grid-template-columns:1.4fr repeat(2, minmax(160px,.55fr)) auto; gap:.85rem; align-items:end; }
+    .field { display:grid; gap:.3rem; font-weight:700; }
+    input,select,textarea { width:100%; padding:.55rem .6rem; background:#fff; color:var(--ink); }
+    .buttons { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .primary,.secondary,.danger { padding:.62rem .9rem; }
+    .primary { color:#fff; border-color:var(--brand-dark); background:var(--brand); }
+    .primary:hover { background:var(--brand-dark); }
+    .secondary { background:#fff; color:var(--brand-dark); }
+    .danger { background:#fff; color:var(--danger); border-color:var(--danger); }
+    .summary-grid { margin:1.25rem 0; display:grid; grid-template-columns:repeat(5,1fr); }
+    .metric { padding:.85rem 1rem; border-right:1px solid var(--line); }
+    .metric:last-child { border-right:0; }
+    .metric strong { display:block; font-size:1.65rem; line-height:1.05; }
+    .metric span { color:var(--muted); font-size:.9rem; }
+    .progress-wrap { margin:0 0 1.25rem; }
+    .progress-label { display:flex; justify-content:space-between; gap:1rem; font-weight:700; }
+    progress { width:100%; height:1rem; accent-color:var(--brand); }
+    .results-info { margin:0 0 .8rem; color:#334e68; }
+    .checklist { display:grid; gap:1rem; }
+    .card { border-left:6px solid #94a3b8; padding:1.1rem; }
+    .card.issue { border-left-color:var(--danger); }
+    .card.pass { border-left-color:var(--good); }
+    .card.na { border-left-color:#64748b; }
+    .card h2 { font-size:1.2rem; line-height:1.25; margin:0; }
+    .meta { display:flex; flex-wrap:wrap; gap:.45rem; margin:.65rem 0; }
+    .tag { border-radius:999px; padding:.17rem .55rem; font-size:.83rem; font-weight:700; background:#e5edf5; color:#243b53; }
+    .priority-5 { background:#fce7e5; color:#8a1c16; } .priority-4 { background:#fff1d6; color:#714c00; } .priority-3 { background:#e7f0f8; color:#0b4b78; } .priority-2,.priority-1 { background:#edf2f7; color:#334e68; }
+    details { margin:.7rem 0; }
+    summary { cursor:pointer; color:var(--brand-dark); font-weight:700; }
+    .question { margin:.7rem 0; font-weight:700; }
+    .card-grid { display:grid; grid-template-columns:minmax(210px,.48fr) minmax(250px,1fr); gap:1rem; align-items:start; }
+    .answer label,.note-label { display:block; font-weight:700; margin-bottom:.3rem; }
+    textarea { min-height:88px; resize:vertical; }
+    .status { min-height:1.5rem; margin:1rem 0 0; font-weight:700; }
+    .status[data-kind="success"] { color:var(--good); } .status[data-kind="error"] { color:var(--danger); }
+    footer { color:#486581; font-size:.9rem; padding:1.5rem 0; }
+    @media (max-width:780px) { .toolbar { grid-template-columns:1fr 1fr; } .toolbar .search { grid-column:1/-1; } .summary-grid { grid-template-columns:repeat(3,1fr); } .metric:nth-child(3) { border-right:0; } .card-grid { grid-template-columns:1fr; } }
+    @media (max-width:480px) { .wrap { width:min(100% - 1rem,1180px); } .toolbar { grid-template-columns:1fr; } .summary-grid { grid-template-columns:repeat(2,1fr); } .metric { border-bottom:1px solid var(--line); } .metric:nth-child(2) { border-right:0; } }
+    @media print { body { background:#fff; font-size:11pt; } header { background:#fff; color:#000; border-bottom:2px solid #000; } .hero p { color:#000; } .toolbar,.notice,.progress-wrap,footer { display:none; } .summary-grid,.card { box-shadow:none; } .card { break-inside:avoid; } .checklist { gap:.45rem; } textarea { border:0; min-height:2.3rem; padding:0; } select { appearance:none; border:0; padding:0; } details { display:none; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#checklist">Skip to checklist</a>
+  <header><div class="wrap hero"><h1>Video WCAG Compliance Checker</h1><p>Document an accessibility review of prerecorded or live video, including its player controls. Select an outcome for every applicable check and record evidence or remediation notes.</p></div></header>
+  <main class="wrap">
+    <section class="notice" aria-labelledby="about-heading"><strong id="about-heading">How to use this tool</strong><p>“Issue found” means the discovery question is true. “Pass” means no issue was found. This checklist supports review documentation; evaluate the published video, player, captions, transcript, and surrounding page together.</p></section>
+    <section class="toolbar" aria-label="Checklist controls">
+      <label class="field search" for="search">Search checks<input id="search" type="search" placeholder="Search title, criterion, or question"></label>
+      <label class="field" for="filter">Show<select id="filter"><option value="all">All checks</option><option value="issue">Issues found</option><option value="pass">Passed</option><option value="na">Not applicable</option><option value="pending">Not reviewed</option></select></label>
+      <label class="field" for="priority">Priority<select id="priority"><option value="all">All priorities</option><option value="5">Highest</option><option value="4">High</option><option value="3">Medium</option><option value="2">Low</option><option value="1">Lowest</option></select></label>
+      <div class="buttons"><button class="primary" id="export" type="button">Download results (CSV)</button><button class="secondary" id="print" type="button">Print review</button><button class="danger" id="reset" type="button">Clear review</button></div>
+    </section>
+    <section class="summary-grid" aria-label="Review summary">
+      <div class="metric"><strong id="total">0</strong><span>Total checks</span></div><div class="metric"><strong id="reviewed">0</strong><span>Reviewed</span></div><div class="metric"><strong id="issues">0</strong><span>Issues found</span></div><div class="metric"><strong id="passed">0</strong><span>Passed</span></div><div class="metric"><strong id="na">0</strong><span>Not applicable</span></div>
+    </section>
+    <section class="progress-wrap" aria-label="Review completion"><div class="progress-label"><span>Review completion</span><span id="completion">0 of 0</span></div><progress id="progress" value="0" max="1">0%</progress></section>
+    <p class="results-info" id="results-info" aria-live="polite"></p>
+    <section id="checklist" class="checklist" aria-label="Video WCAG checks"></section>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </main>
+  <footer class="wrap">Built from the supplied Web Content Accessibility checklist. WCAG success criteria identify a conformance requirement; this review aid does not replace testing with people who use assistive technology.</footer>
+  <script>
+    const checks = [
+      ["Audio-only", "1.2.1", 5, 1, "Is there audio-only content without a transcript?", "Provide a complete, accurate text transcript for audio-only material."],
+      ["Video-only", "1.2.1", 5, 1, "Is there video without an audio track or accurate text description?", "Provide a text alternative or an audio description that communicates meaningful visual information."],
+      ["Captions (Prerecorded Videos)", "1.2.2", 5, 2, "Is there pre-recorded video with speech and missing, inaccurate, out-of-sync, or incomplete captions?", "Verify captions cover meaningful speech and sounds, identify speakers where needed, and remain synchronized."],
+      ["Captions (Live Videos)", "1.2.4", 3, 2, "Is there live video with speech and missing, inaccurate, or significantly delayed captions?", "Provide real-time captions for live speech and assess their accuracy and timeliness."],
+      ["Audio Descriptions", "1.2.5", 3, 2, "Is there video with visual information but no audio descriptions?", "Supply audio descriptions when visual details needed to understand the content are not conveyed in the primary audio."],
+      ["Audio Control", "1.4.2", 1, 1, "Does sound play automatically for more than 3 seconds without a way to pause or stop it?", "Provide an obvious pause, stop, or independent volume control."],
+      ["Contrast (Normal Text)", "1.4.3", 4, 2, "Is text in captions, transcript controls, or player UI hard to read because contrast is less than 4.5:1?", "Test text and icons against their adjacent background in all player states."],
+      ["Non-text Contrast (Player Controls)", "1.4.11", 3, 3, "Do player controls or their visual focus indicators have contrast less than 3:1?", "Check play, pause, volume, captions, settings, seek controls, and visible focus indicators."],
+      ["Keyboard Operable", "2.1.1", 5, 2, "Is any player function operable with a mouse but unavailable by keyboard, with no alternative keyboard method?", "Test play, pause, seek, volume, mute, captions, full screen, and settings using only a keyboard."],
+      ["No Keyboard Trap", "2.1.2", 5, 1, "When navigating the player by keyboard, does focus become trapped without advising the user how to escape?", "Confirm focus can enter and leave every player control and any full-screen or settings interface."],
+      ["Pause, Stop, Hide", "2.2.2", 2, 2, "Does moving, blinking, scrolling, or auto-updating video content lack a way to pause, stop, or hide it?", "For auto-playing or moving content, ensure users can control it unless an exception applies."],
+      ["Three Flashes or Below Threshold", "2.3.1", 5, 2, "Does the video flash more than three times per second and exceed applicable flash thresholds?", "Remove or modify hazardous flashing content. Test uncertain content with an appropriate flash analysis method."],
+      ["Focus Order", "2.4.3", 4, 2, "When using a keyboard, does focus move through the video player in a confusing or illogical order?", "Keep focus order aligned with the visual order and expected control sequence."],
+      ["Focus Visible", "2.4.7", 4, 1, "When navigating the player with a keyboard, does the visual indication of focus disappear or appear on the wrong element?", "Ensure every keyboard-operable control has a clear, persistent focus indicator."],
+      ["Pointer Gestures", "2.5.1", 5, 2, "Do any player functions require complex gestures without a simple alternative such as tap or click?", "Offer a single-pointer alternative for gestures such as pinch, swipe, or multi-finger commands."],
+      ["On Focus (Change of Context)", "3.2.1", 5, 2, "Does focusing a video player control unexpectedly change context, move focus, open a new window, or cause a significant layout shift?", "Do not trigger unexpected context changes on focus."],
+      ["Name, Role, Value (Non-native Controls)", "4.1.2", 5, 3, "Are custom video player controls missing correct accessible names, roles, states, or values?", "Test controls with a screen reader. Ensure states such as play/pause, muted, captions on/off, and slider values are exposed."],
+      ["Status Messages Not Announced", "4.1.3", 4, 3, "Are important player status messages, such as caption or volume changes, not announced to screen readers?", "Expose status updates programmatically without moving focus unless moving focus is appropriate."],
+      ["Non-text Content (Poster and Thumbnails)", "1.1.1", 5, 2, "Do meaningful video posters, thumbnails, or image controls have missing or incorrect text alternatives?", "Give meaningful image controls a concise accessible name; hide purely decorative images from assistive technology."]
+    ].map(([title,sc,priority,difficulty,question,guidance],id)=>({id,title,sc,priority,difficulty,question,guidance}));
+    const priorityName = {5:"Highest",4:"High",3:"Medium",2:"Low",1:"Lowest"};
+    const state = JSON.parse(localStorage.getItem("videoWcagReview") || "{}");
+    const el = id => document.getElementById(id);
+    const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    function save(){ localStorage.setItem("videoWcagReview",JSON.stringify(state)); }
+    function readCheck(id){ return state[id] || {outcome:"pending",note:""}; }
+    function setCheck(id,field,value){ state[id] = {...readCheck(id),[field]:value}; save(); render(); }
+    function filtered(){ const term=el("search").value.trim().toLowerCase(), filter=el("filter").value, pri=el("priority").value; return checks.filter(c=>{const v=readCheck(c.id); return (!term || `${c.title} ${c.sc} ${c.question} ${c.guidance}`.toLowerCase().includes(term)) && (filter==="all" || v.outcome===filter) && (pri==="all" || String(c.priority)===pri);}); }
+    function option(value,label,selected){ return `<option value="${value}" ${selected===value?"selected":""}>${label}</option>`; }
+    function render(){
+      const showing=filtered(), outcomes=checks.map(c=>readCheck(c.id).outcome), count=o=>outcomes.filter(x=>x===o).length, reviewed=checks.length-count("pending");
+      el("total").textContent=checks.length; el("reviewed").textContent=reviewed; el("issues").textContent=count("issue"); el("passed").textContent=count("pass"); el("na").textContent=count("na"); el("completion").textContent=`${reviewed} of ${checks.length}`; el("progress").max=checks.length; el("progress").value=reviewed; el("results-info").textContent=`Showing ${showing.length} of ${checks.length} checks.`;
+      el("checklist").innerHTML=showing.map(c=>{const v=readCheck(c.id); return `<article class="card ${v.outcome}" data-id="${c.id}"><h2>${escapeHtml(c.title)}</h2><div class="meta"><span class="tag priority-${c.priority}">Priority ${c.priority}: ${priorityName[c.priority]}</span><span class="tag">WCAG ${escapeHtml(c.sc)}</span><span class="tag">Testing difficulty: ${c.difficulty===1?"Beginner":c.difficulty===2?"Intermediate":"Advanced"}</span></div><p class="question">${escapeHtml(c.question)}</p><details><summary>Testing guidance</summary><p>${escapeHtml(c.guidance)}</p></details><div class="card-grid"><div class="answer"><label for="outcome-${c.id}">Review outcome</label><select id="outcome-${c.id}" data-field="outcome" data-id="${c.id}">${option("pending","Not reviewed",v.outcome)}${option("pass","Pass — no issue found",v.outcome)}${option("issue","Issue found",v.outcome)}${option("na","Not applicable",v.outcome)}</select></div><div><label class="note-label" for="note-${c.id}">Evidence or remediation notes</label><textarea id="note-${c.id}" data-field="note" data-id="${c.id}" placeholder="Record evidence, location, owner, or next action…">${escapeHtml(v.note)}</textarea></div></div></article>`; }).join("") || '<p>No checks match the current filters.</p>';
+    }
+    document.addEventListener("change",e=>{if(e.target.dataset.id) setCheck(e.target.dataset.id,e.target.dataset.field,e.target.value);});
+    document.addEventListener("input",e=>{if(e.target.dataset.id && e.target.dataset.field==="note"){ state[e.target.dataset.id]={...readCheck(e.target.dataset.id),note:e.target.value}; save(); }});
+    ["search","filter","priority"].forEach(id=>el(id).addEventListener("input",render));
+    el("print").addEventListener("click",()=>window.print());
+    el("reset").addEventListener("click",()=>{ if(confirm("Clear every recorded review outcome and note?")){ localStorage.removeItem("videoWcagReview"); Object.keys(state).forEach(k=>delete state[k]); render(); el("status").dataset.kind="success"; el("status").textContent="The review has been cleared."; }});
+    el("export").addEventListener("click",()=>{const csv=[['Title','WCAG SC','Priority','Testing difficulty','Discovery question','Outcome','Evidence or remediation notes'],...checks.map(c=>[c.title,c.sc,`${c.priority} ${priorityName[c.priority]}`,c.difficulty,c.question,readCheck(c.id).outcome,readCheck(c.id).note])].map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='video-wcag-review.csv'; a.click(); URL.revokeObjectURL(a.href); el("status").dataset.kind="success"; el("status").textContent="The review results were downloaded as a CSV file.";});
+    render();
+  </script>
+</body>
+</html>

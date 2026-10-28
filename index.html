@@ -67,9 +67,9 @@
 </head>
 <body>
   <a class="skip" href="#checklist">Skip to checklist</a>
-  <header><div class="wrap hero"><h1>Video WCAG Compliance Checker</h1><p>Document an accessibility review of prerecorded or live video, including its player controls. Select an outcome for every applicable check and record evidence or remediation notes.</p></div></header>
+  <header><div class="wrap hero"><h1>Video WCAG Compliance Checker</h1><p>Document an accessibility review of prerecorded or live video content. Select an outcome for every applicable check and record evidence or remediation notes.</p></div></header>
   <main class="wrap">
-    <section class="notice" aria-labelledby="about-heading"><strong id="about-heading">How to use this tool</strong><p>“Issue found” means the discovery question is true. “Pass” means no issue was found. This checklist supports review documentation; evaluate the published video, player, captions, transcript, and surrounding page together.</p></section>
+    <section class="notice" aria-labelledby="about-heading"><strong id="about-heading">How to use this tool</strong><p>“Issue found” means the discovery question is true. “Pass” means no issue was found. This checklist supports review documentation for the published video, captions, transcript, and visual content.</p></section>
     <section class="toolbar" aria-label="Checklist controls">
       <label class="field search" for="search">Search checks<input id="search" type="search" placeholder="Search title, criterion, or question"></label>
       <label class="field" for="filter">Show<select id="filter"><option value="all">All checks</option><option value="issue">Issues found</option><option value="pass">Passed</option><option value="na">Not applicable</option><option value="pending">Not reviewed</option></select></label>
@@ -92,19 +92,8 @@
       ["Captions (Prerecorded Videos)", "1.2.2", 5, 2, "Is there pre-recorded video with speech and missing, inaccurate, out-of-sync, or incomplete captions?", "Verify captions cover meaningful speech and sounds, identify speakers where needed, and remain synchronized."],
       ["Captions (Live Videos)", "1.2.4", 3, 2, "Is there live video with speech and missing, inaccurate, or significantly delayed captions?", "Provide real-time captions for live speech and assess their accuracy and timeliness."],
       ["Audio Descriptions", "1.2.5", 3, 2, "Is there video with visual information but no audio descriptions?", "Supply audio descriptions when visual details needed to understand the content are not conveyed in the primary audio."],
-      ["Audio Control", "1.4.2", 1, 1, "Does sound play automatically for more than 3 seconds without a way to pause or stop it?", "Provide an obvious pause, stop, or independent volume control."],
-      ["Contrast (Normal Text)", "1.4.3", 4, 2, "Is text in captions, transcript controls, or player UI hard to read because contrast is less than 4.5:1?", "Test text and icons against their adjacent background in all player states."],
-      ["Non-text Contrast (Player Controls)", "1.4.11", 3, 3, "Do player controls or their visual focus indicators have contrast less than 3:1?", "Check play, pause, volume, captions, settings, seek controls, and visible focus indicators."],
-      ["Keyboard Operable", "2.1.1", 5, 2, "Is any player function operable with a mouse but unavailable by keyboard, with no alternative keyboard method?", "Test play, pause, seek, volume, mute, captions, full screen, and settings using only a keyboard."],
-      ["No Keyboard Trap", "2.1.2", 5, 1, "When navigating the player by keyboard, does focus become trapped without advising the user how to escape?", "Confirm focus can enter and leave every player control and any full-screen or settings interface."],
-      ["Pause, Stop, Hide", "2.2.2", 2, 2, "Does moving, blinking, scrolling, or auto-updating video content lack a way to pause, stop, or hide it?", "For auto-playing or moving content, ensure users can control it unless an exception applies."],
+      ["Contrast (Normal Text)", "1.4.3", 4, 2, "Is text in captions or a transcript hard to read because contrast is less than 4.5:1?", "Test text against its adjacent background throughout the video and transcript."],
       ["Three Flashes or Below Threshold", "2.3.1", 5, 2, "Does the video flash more than three times per second and exceed applicable flash thresholds?", "Remove or modify hazardous flashing content. Test uncertain content with an appropriate flash analysis method."],
-      ["Focus Order", "2.4.3", 4, 2, "When using a keyboard, does focus move through the video player in a confusing or illogical order?", "Keep focus order aligned with the visual order and expected control sequence."],
-      ["Focus Visible", "2.4.7", 4, 1, "When navigating the player with a keyboard, does the visual indication of focus disappear or appear on the wrong element?", "Ensure every keyboard-operable control has a clear, persistent focus indicator."],
-      ["Pointer Gestures", "2.5.1", 5, 2, "Do any player functions require complex gestures without a simple alternative such as tap or click?", "Offer a single-pointer alternative for gestures such as pinch, swipe, or multi-finger commands."],
-      ["On Focus (Change of Context)", "3.2.1", 5, 2, "Does focusing a video player control unexpectedly change context, move focus, open a new window, or cause a significant layout shift?", "Do not trigger unexpected context changes on focus."],
-      ["Name, Role, Value (Non-native Controls)", "4.1.2", 5, 3, "Are custom video player controls missing correct accessible names, roles, states, or values?", "Test controls with a screen reader. Ensure states such as play/pause, muted, captions on/off, and slider values are exposed."],
-      ["Status Messages Not Announced", "4.1.3", 4, 3, "Are important player status messages, such as caption or volume changes, not announced to screen readers?", "Expose status updates programmatically without moving focus unless moving focus is appropriate."],
       ["Non-text Content (Poster and Thumbnails)", "1.1.1", 5, 2, "Do meaningful video posters, thumbnails, or image controls have missing or incorrect text alternatives?", "Give meaningful image controls a concise accessible name; hide purely decorative images from assistive technology."]
     ].map(([title,sc,priority,difficulty,question,guidance],id)=>({id,title,sc,priority,difficulty,question,guidance}));
     const priorityName = {5:"Highest",4:"High",3:"Medium",2:"Low",1:"Lowest"};
